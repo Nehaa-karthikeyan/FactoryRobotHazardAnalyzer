@@ -18,32 +18,38 @@ public class FactoryRobotHazardAnalyzer {
         System.out.println("Enter Machinery State:");
         String machineryState = sc.nextLine();
 
-        double risk = calculateHazardRisk(
-                armPrecision, workerDensity, machineryState
-        );
-
-        if (risk != -1) {
+        try {
+            double risk = calculateHazardRisk(
+                    armPrecision, workerDensity, machineryState
+            );
             System.out.println("Robot Hazard Risk Score: " + risk);
+        }
+        catch (RobotSafetyException e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    // UC5 method here
     public static double calculateHazardRisk(
             double armPrecision,
             int workerDensity,
-            String machineryState) {
+            String machineryState)
+            throws RobotSafetyException {
 
         double machineRiskFactor;
 
         if (armPrecision < 0.0 || armPrecision > 1.0) {
-            System.out.println("Error: Arm precision must be 0.0-1.0");
-            return -1;
+            throw new RobotSafetyException(
+                    "Error: Arm precision must be 0.0-1.0"
+            );
         }
-        else if (workerDensity < 1 || workerDensity > 20) {
-            System.out.println("Error: Worker density must be 1-20");
-            return -1;
+
+        if (workerDensity < 1 || workerDensity > 20) {
+            throw new RobotSafetyException(
+                    "Error: Worker density must be 1-20"
+            );
         }
-        else if (machineryState.equals("Worn")) {
+
+        if (machineryState.equals("Worn")) {
             machineRiskFactor = 1.3;
         }
         else if (machineryState.equals("Faulty")) {
@@ -53,12 +59,12 @@ public class FactoryRobotHazardAnalyzer {
             machineRiskFactor = 3.0;
         }
         else {
-            System.out.println("Error: Unsupported machinery state");
-            return -1;
+            throw new RobotSafetyException(
+                    "Error: Unsupported machinery state"
+            );
         }
 
         return ((1.0 - armPrecision) * 15.0)
                 + (workerDensity * machineRiskFactor);
     }
-
 }
